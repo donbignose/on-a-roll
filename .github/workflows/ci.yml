@@ -22,6 +22,8 @@ jobs:
       run: cargo install diesel_cli --no-default-features --features sqlite
     - name: Run Diesel Migrations
       run: diesel migration run
+    - name: Audit dependencies
+      run: cargo audit
     - name: Build
       run: cargo build --verbose
     - name: Run tests
