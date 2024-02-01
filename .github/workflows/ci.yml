@@ -18,6 +18,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Install Diesel CLI
+      run: cargo install diesel_cli --no-default-features --features sqlite
     - name: Run Diesel Migrations
       run: diesel migration run
     - name: Build
