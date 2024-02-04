@@ -14,6 +14,7 @@ diesel = { version = "2.1.4", features = [
   "sqlite",
   "returning_clauses_for_sqlite_3_35",
 ] }
+libsqlite3-sys = { version = "0.27", features = ["bundled"] }
 diesel_migrations = "2.1.0"
 dotenvy = "0.15.7"
 glob = "0.3.1"
