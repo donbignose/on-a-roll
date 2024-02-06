@@ -6,7 +6,7 @@ use diesel::result::Error;
 pub const DEFAULT_TASK_TITLE: &str = "Untitled Task";
 pub const DEFAULT_TASK_STATUS: &str = "pending";
 
-#[derive(Queryable, Selectable)]
+#[derive(Debug, Queryable, Selectable)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Task {
     pub id: i32,
@@ -33,7 +33,7 @@ pub struct UpdateTask<'a> {
 }
 
 impl Task {
-    pub fn find(conn: &mut SqliteConnection, id: &i32) -> Result<Task, Error> {
+    pub fn find(conn: &mut SqliteConnection, id: i32) -> Result<Task, Error> {
         use schema::tasks::dsl::tasks;
         tasks.find(id).first(conn)
     }

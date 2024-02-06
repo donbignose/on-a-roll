@@ -41,7 +41,7 @@ fn test_update_task() {
 fn test_find_task() {
     let mut conn = establish_test_connection();
     let task = Task::create(&mut conn, "Task to find", None, None).unwrap();
-    let found_result = Task::find(&mut conn, &task.id);
+    let found_result = Task::find(&mut conn, task.id);
 
     match found_result {
         Ok(found_task) => assert_eq!(found_task.title, "Task to find"),
@@ -85,7 +85,7 @@ fn test_update_task_error() {
 #[test]
 fn test_find_task_error() {
     let mut conn = establish_test_connection();
-    let result = Task::find(&mut conn, &9999); // Non-existent ID
+    let result = Task::find(&mut conn, 9999); // Non-existent ID
 
     assert!(
         matches!(result, Err(diesel::result::Error::NotFound)),
