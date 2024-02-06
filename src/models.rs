@@ -3,6 +3,9 @@ use crate::schema::tasks;
 use diesel::prelude::*;
 use diesel::result::Error;
 
+pub const DEFAULT_TASK_TITLE: &str = "Untitled Task";
+pub const DEFAULT_TASK_STATUS: &str = "pending";
+
 #[derive(Queryable, Selectable)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Task {
@@ -41,10 +44,15 @@ impl Task {
         status: Option<&str>,
     ) -> Result<Task, Error> {
         use schema::tasks::dsl::tasks;
+        let effective_title = if title.trim().is_empty() {
+            DEFAULT_TASK_TITLE
+        } else {
+            title
+        };
         let new_task = NewTask {
-            title,
+            title: effective_title,
             description,
-            status: status.unwrap_or("pending"),
+            status: status.unwrap_or(DEFAULT_TASK_STATUS),
         };
         diesel::insert_into(tasks)
             .values(&new_task)
