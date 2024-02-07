@@ -101,7 +101,18 @@ fn main() {
         },
         Commands::List => {
             println!("Listing tasks");
-            unimplemented!()
+            match Task::list(&mut conn) {
+                Ok(tasks) => {
+                    if tasks.is_empty() {
+                        println!("No tasks found");
+                    } else {
+                        for task in tasks {
+                            println!("{:?}", task);
+                        }
+                    }
+                }
+                Err(e) => eprintln!("Error listing tasks: {}", e),
+            }
         }
     }
 }
