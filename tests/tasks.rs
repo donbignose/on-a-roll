@@ -50,6 +50,29 @@ fn test_find_task() {
 }
 
 #[test]
+fn test_list_tasks() {
+    let mut conn = establish_test_connection();
+    Task::create(&mut conn, "Task 1", None, None).unwrap();
+    Task::create(&mut conn, "Task 2", None, None).unwrap();
+
+    let tasks = Task::list(&mut conn);
+    match tasks {
+        Ok(tasks) => assert!(tasks.len() == 2),
+        Err(e) => panic!("Failed to list tasks: {}", e),
+    }
+}
+
+#[test]
+fn test_list_tasks_no_tasks() {
+    let mut conn = establish_test_connection();
+
+    let tasks = Task::list(&mut conn);
+    match tasks {
+        Ok(tasks) => assert!(tasks.is_empty()),
+        Err(e) => panic!("Failed to list tasks: {}", e),
+    }
+}
+#[test]
 fn test_delete_task() {
     let mut conn = establish_test_connection();
     let task = Task::create(&mut conn, "Task to delete", None, None).unwrap();

@@ -37,6 +37,10 @@ impl Task {
         use schema::tasks::dsl::tasks;
         tasks.find(id).first(conn)
     }
+    pub fn list(conn: &mut SqliteConnection) -> Result<Vec<Task>, Error> {
+        use schema::tasks::dsl::tasks;
+        tasks.load::<Task>(conn)
+    }
     pub fn create(
         conn: &mut SqliteConnection,
         title: &str,
