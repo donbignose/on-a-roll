@@ -41,7 +41,7 @@ fn test_update_task() {
 fn test_find_task() {
     let mut conn = establish_test_connection();
     let task = Task::create(&mut conn, "Task to find", None, None).unwrap();
-    let found_result = Task::find(&mut conn, &task.id);
+    let found_result = Task::find(&mut conn, task.id);
 
     match found_result {
         Ok(found_task) => assert_eq!(found_task.title, "Task to find"),
@@ -49,6 +49,29 @@ fn test_find_task() {
     }
 }
 
+#[test]
+fn test_list_tasks() {
+    let mut conn = establish_test_connection();
+    Task::create(&mut conn, "Task 1", None, None).unwrap();
+    Task::create(&mut conn, "Task 2", None, None).unwrap();
+
+    let tasks = Task::list(&mut conn);
+    match tasks {
+        Ok(tasks) => assert!(tasks.len() == 2),
+        Err(e) => panic!("Failed to list tasks: {}", e),
+    }
+}
+
+#[test]
+fn test_list_tasks_no_tasks() {
+    let mut conn = establish_test_connection();
+
+    let tasks = Task::list(&mut conn);
+    match tasks {
+        Ok(tasks) => assert!(tasks.is_empty()),
+        Err(e) => panic!("Failed to list tasks: {}", e),
+    }
+}
 #[test]
 fn test_delete_task() {
     let mut conn = establish_test_connection();
@@ -85,7 +108,7 @@ fn test_update_task_error() {
 #[test]
 fn test_find_task_error() {
     let mut conn = establish_test_connection();
-    let result = Task::find(&mut conn, &9999); // Non-existent ID
+    let result = Task::find(&mut conn, 9999); // Non-existent ID
 
     assert!(
         matches!(result, Err(diesel::result::Error::NotFound)),
