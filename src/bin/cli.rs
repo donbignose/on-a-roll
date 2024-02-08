@@ -16,11 +16,13 @@ enum Commands {
     #[command(arg_required_else_help = true)]
     Add {
         /// Task title
-        title: String,
+        title: Option<String>,
         /// Optional task description
         description: Option<String>,
         /// Optional task status, defaults to 'pending'
         status: Option<String>,
+        /// Optional project id
+        project_id: Option<i32>,
     },
     /// Update an existing task
     Update {
@@ -32,6 +34,8 @@ enum Commands {
         description: Option<String>,
         /// New task status
         status: Option<String>,
+        /// New project id
+        project_id: Option<i32>,
     },
     /// Delete an existing task
     Delete {
@@ -56,12 +60,19 @@ fn main() {
             title,
             description,
             status,
+            project_id,
         } => {
             println!(
-                "Adding task: {} with description: {:?} and status: {:?}",
+                "Adding task: {:?} with description: {:?} and status: {:?}",
                 title, description, status
             );
-            match Task::create(&mut conn, &title, description.as_deref(), status.as_deref()) {
+            match Task::create(
+                &mut conn,
+                title.as_deref(),
+                description.as_deref(),
+                status.as_deref(),
+                project_id,
+            ) {
                 Ok(task) => println!("Task created with id: {}", task.id),
                 Err(e) => eprintln!("Error creating task: {}", e),
             }
@@ -71,6 +82,7 @@ fn main() {
             title,
             description,
             status,
+            project_id,
         } => {
             println!(
                 "Updating task: {} with title: {:?}, description: {:?} and status: {:?}",
@@ -82,6 +94,7 @@ fn main() {
                 title.as_deref(),
                 description.as_deref(),
                 status.as_deref(),
+                project_id,
             ) {
                 Ok(task) => println!("Task updated: {:?}", task),
                 Err(e) => eprintln!("Error updating task: {}", e),
