@@ -1,16 +1,23 @@
 mod common;
 use common::establish_test_connection;
 use on_a_roll::models::Task;
+use on_a_roll::models::{DEFAULT_TASK_STATUS, DEFAULT_TASK_TITLE};
 
 #[test]
 fn test_create_task() {
     let mut conn = establish_test_connection();
-    let task = Task::create(&mut conn, "Test Task", Some("Description"), None);
+    let task = Task::create(
+        &mut conn,
+        Some("Test Task"),
+        Some("Description"),
+        None,
+        None,
+    );
     match task {
         Ok(task) => {
             assert_eq!(task.title, "Test Task");
             assert_eq!(task.description, Some("Description".to_string()));
-            assert_eq!(task.status, "pending");
+            assert_eq!(task.status, DEFAULT_TASK_STATUS);
         }
         Err(e) => panic!("Failed to create task: {}", e),
     }
@@ -19,13 +26,14 @@ fn test_create_task() {
 #[test]
 fn test_update_task() {
     let mut conn = establish_test_connection();
-    let task = Task::create(&mut conn, "Old Title", None, None).unwrap();
+    let task = Task::create(&mut conn, Some("Old Title"), None, None, None).unwrap();
     let updated_result = Task::update(
         &mut conn,
         task.id,
         Some("New Title"),
         None,
         Some("completed"),
+        None,
     );
 
     match updated_result {
@@ -40,7 +48,7 @@ fn test_update_task() {
 #[test]
 fn test_find_task() {
     let mut conn = establish_test_connection();
-    let task = Task::create(&mut conn, "Task to find", None, None).unwrap();
+    let task = Task::create(&mut conn, Some("Task to find"), None, None, None).unwrap();
     let found_result = Task::find(&mut conn, task.id);
 
     match found_result {
@@ -52,8 +60,8 @@ fn test_find_task() {
 #[test]
 fn test_list_tasks() {
     let mut conn = establish_test_connection();
-    Task::create(&mut conn, "Task 1", None, None).unwrap();
-    Task::create(&mut conn, "Task 2", None, None).unwrap();
+    Task::create(&mut conn, Some("Task 1"), None, None, None).unwrap();
+    Task::create(&mut conn, Some("Task 2"), None, None, None).unwrap();
 
     let tasks = Task::list(&mut conn);
     match tasks {
@@ -75,7 +83,7 @@ fn test_list_tasks_no_tasks() {
 #[test]
 fn test_delete_task() {
     let mut conn = establish_test_connection();
-    let task = Task::create(&mut conn, "Task to delete", None, None).unwrap();
+    let task = Task::create(&mut conn, Some("Task to delete"), None, None, None).unwrap();
     let delete_result = Task::delete(&mut conn, task.id);
 
     match delete_result {
@@ -86,9 +94,8 @@ fn test_delete_task() {
 
 #[test]
 fn test_create_default_task() {
-    use on_a_roll::models::{DEFAULT_TASK_STATUS, DEFAULT_TASK_TITLE};
     let mut conn = establish_test_connection();
-    let task = Task::create(&mut conn, "", None, None).unwrap(); // Assuming title cannot be empty
+    let task = Task::create(&mut conn, None, None, None, None).unwrap(); // Assuming title cannot be empty
 
     assert_eq!(task.title, DEFAULT_TASK_TITLE);
     assert_eq!(task.description, None);
@@ -98,7 +105,7 @@ fn test_create_default_task() {
 #[test]
 fn test_update_task_error() {
     let mut conn = establish_test_connection();
-    let result = Task::update(&mut conn, 9999, Some("Non-existent"), None, None); // Non-existent ID
+    let result = Task::update(&mut conn, 9999, Some("Non-existent"), None, None, None); // Non-existent ID
 
     assert!(
         matches!(result, Err(diesel::result::Error::NotFound)),
