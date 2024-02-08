@@ -1,14 +1,15 @@
 repos:
   - hooks:
       - id: commitizen
-      - id: commitizen-branch
-        stages:
-          - push
     repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.14.0
+    rev: v3.14.1
   - hooks:
       - id: fmt
       - id: cargo-check
       - id: clippy
     repo: https://github.com/doublify/pre-commit-rust
     rev: v1.0
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.18.1
+    hooks:
+      - id: typos
