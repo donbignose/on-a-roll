@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use on_a_roll::establish_connection;
+use on_a_roll::db::connection::establish_connection;
 use on_a_roll::models::Task;
 
 #[derive(Debug, Parser)]
