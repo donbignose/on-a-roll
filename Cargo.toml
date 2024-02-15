@@ -3,6 +3,8 @@ name = "on-a-roll"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/donbignose/on-a-roll/"
+description = "On a Roll is CLI task manager wriiten in Rust that makes you feel like you are on a roll today!"
+license = "MIT"
 
 [[bin]]
 name = "roll"
