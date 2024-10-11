@@ -11,6 +11,10 @@ name = "roll"
 path = "src/bin/cli/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+name = "roll-tui"
+path = "src/bin/tui/main.rs"
+
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
 diesel = { version = "2.2.4", features = [
@@ -21,6 +25,7 @@ libsqlite3-sys = { version = "0.30", features = ["bundled"] }
 diesel_migrations = "2.2.0"
 dotenvy = "0.15.7"
 glob = "0.3.1"
+ratatui = { version = "0.28.1", features = ["all-widgets"] }
 
 # The profile that 'cargo dist' will build with
 [profile.dist]
