@@ -6,13 +6,14 @@ use on_a_roll::models::Task;
 use ratatui::{
     crossterm::event::{self, KeyCode, KeyEvent, KeyEventKind},
     style::{Modifier, Style},
-    widgets::{Block, List},
+    widgets::{Block, List, ListState},
     DefaultTerminal, Frame,
 };
 
 pub struct App {
     conn: SqliteConnection,
     tasks: Vec<Task>,
+    task_state: ListState,
     exit: bool,
 }
 
@@ -23,6 +24,7 @@ impl App {
         Self {
             conn,
             tasks,
+            task_state: ListState::default().with_selected(Some(0)),
             exit: false,
         }
     }
@@ -33,13 +35,13 @@ impl App {
         }
         Ok(())
     }
-    fn draw(&self, frame: &mut Frame) {
+    fn draw(&mut self, frame: &mut Frame) {
         let task_list = List::new(&self.tasks)
             .block(Block::bordered().title("Tasks"))
             .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
             .highlight_symbol(">>")
             .repeat_highlight_symbol(true);
-        frame.render_widget(task_list, frame.area());
+        frame.render_stateful_widget(task_list, frame.area(), &mut self.task_state);
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
@@ -57,6 +59,8 @@ impl App {
         match key_event.code {
             KeyCode::Char('q') => self.exit(),
             KeyCode::Char('r') => self.refresh_tasks(),
+            KeyCode::Char('j') => self.task_state.select_next(),
+            KeyCode::Char('k') => self.task_state.select_previous(),
             _ => {}
         }
     }
