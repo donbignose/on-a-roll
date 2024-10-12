@@ -61,6 +61,7 @@ impl App {
             KeyCode::Char('r') => self.refresh_tasks(),
             KeyCode::Char('j') => self.task_state.select_next(),
             KeyCode::Char('k') => self.task_state.select_previous(),
+            KeyCode::Char('d') => self.delete_selected_task(),
             _ => {}
         }
     }
@@ -69,6 +70,13 @@ impl App {
     }
     fn refresh_tasks(&mut self) {
         self.tasks = Task::list(&mut self.conn).unwrap();
+    }
+
+    fn delete_selected_task(&mut self) {
+        if let Some(selected) = self.task_state.selected() {
+            let task = self.tasks.remove(selected);
+            Task::delete(&mut self.conn, task.id).unwrap();
+        }
     }
 }
 
