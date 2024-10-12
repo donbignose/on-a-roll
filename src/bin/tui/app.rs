@@ -4,10 +4,13 @@ use diesel::SqliteConnection;
 use on_a_roll::db::connection::establish_connection;
 use on_a_roll::models::Task;
 use ratatui::{
+    buffer::Buffer,
     crossterm::event::{self, KeyCode, KeyEvent, KeyEventKind},
+    layout::{Constraint, Layout, Rect},
     style::{Modifier, Style},
-    widgets::{Block, List, ListState},
-    DefaultTerminal, Frame,
+    text::Line,
+    widgets::{Block, List, ListState, Paragraph, StatefulWidget, Widget},
+    DefaultTerminal,
 };
 
 pub struct App {
@@ -28,20 +31,12 @@ impl App {
             exit: false,
         }
     }
-    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+    pub fn run(mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
         while !self.exit {
-            terminal.draw(|frame| self.draw(frame))?;
+            terminal.draw(|frame| frame.render_widget(&mut self, frame.area()))?;
             self.handle_events()?;
         }
         Ok(())
-    }
-    fn draw(&mut self, frame: &mut Frame) {
-        let task_list = List::new(&self.tasks)
-            .block(Block::bordered().title("Tasks"))
-            .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
-            .highlight_symbol(">>")
-            .repeat_highlight_symbol(true);
-        frame.render_stateful_widget(task_list, frame.area(), &mut self.task_state);
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
@@ -77,6 +72,41 @@ impl App {
             let task = self.tasks.remove(selected);
             Task::delete(&mut self.conn, task.id).unwrap();
         }
+    }
+
+    fn render_task_list(&mut self, area: Rect, buf: &mut Buffer) {
+        let task_list = List::new(&self.tasks)
+            .block(Block::bordered().title("Tasks"))
+            .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
+            .highlight_symbol(">>")
+            .repeat_highlight_symbol(true);
+        StatefulWidget::render(task_list, area, buf, &mut self.task_state);
+    }
+
+    fn render_task_detail(&self, area: Rect, buf: &mut Buffer) {
+        if let Some(selected) = self.task_state.selected() {
+            let task = &self.tasks[selected];
+            let text = vec![
+                Line::from(format!("Title: {}", task.title)),
+                Line::from(format!(
+                    "Description: {}",
+                    task.description.as_deref().unwrap_or("")
+                )),
+                Line::from(format!("Status: {}", task.status)),
+            ];
+            Paragraph::new(text)
+                .block(Block::bordered().title("Details"))
+                .render(area, buf);
+        }
+    }
+}
+impl Widget for &mut App {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let [main_area, detail_area] =
+            Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)]).areas(area);
+
+        self.render_task_list(main_area, buf);
+        self.render_task_detail(detail_area, buf);
     }
 }
 
