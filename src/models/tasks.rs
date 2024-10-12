@@ -1,6 +1,7 @@
 use super::projects::Project;
 use crate::schema::tasks;
 use diesel::prelude::*;
+use ratatui::widgets::ListItem;
 
 pub const DEFAULT_TASK_TITLE: &str = "New Task";
 pub const DEFAULT_TASK_STATUS: &str = "Todo";
@@ -14,6 +15,12 @@ pub struct Task {
     pub description: Option<String>,
     pub status: String,
     pub project_id: Option<i32>,
+}
+
+impl<'a> From<&'a Task> for ListItem<'a> {
+    fn from(task: &'a Task) -> Self {
+        ListItem::new(format!("{}: {}", task.id, task.title))
+    }
 }
 
 #[derive(Insertable)]
