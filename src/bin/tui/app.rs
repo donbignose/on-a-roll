@@ -1,3 +1,5 @@
+use crate::utils::centered_rect;
+use crate::widgets::popup::Popup;
 use std::io;
 
 use diesel::SqliteConnection;
@@ -13,10 +15,16 @@ use ratatui::{
     DefaultTerminal,
 };
 
+enum CurrentScreen {
+    MainScreen,
+    Deleting,
+}
+
 pub struct App {
     conn: SqliteConnection,
     tasks: Vec<Task>,
     task_state: ListState,
+    current_screen: CurrentScreen,
     exit: bool,
 }
 
@@ -28,6 +36,7 @@ impl App {
             conn,
             tasks,
             task_state: ListState::default().with_selected(Some(0)),
+            current_screen: CurrentScreen::MainScreen,
             exit: false,
         }
     }
@@ -51,15 +60,34 @@ impl App {
         Ok(())
     }
     fn handle_key_event(&mut self, key_event: KeyEvent) {
+        match self.current_screen {
+            CurrentScreen::MainScreen => self.handle_main_screen_key_event(key_event),
+            CurrentScreen::Deleting => self.handle_deleting_screen_key_event(key_event),
+        }
+    }
+
+    fn handle_main_screen_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Char('q') => self.exit(),
             KeyCode::Char('r') => self.refresh_tasks(),
             KeyCode::Char('j') => self.task_state.select_next(),
             KeyCode::Char('k') => self.task_state.select_previous(),
-            KeyCode::Char('d') => self.delete_selected_task(),
+            KeyCode::Char('d') => self.start_task_deletion(),
             _ => {}
         }
     }
+
+    fn handle_deleting_screen_key_event(&mut self, key_event: KeyEvent) {
+        match key_event.code {
+            KeyCode::Char('y') => {
+                self.delete_selected_task();
+                self.current_screen = CurrentScreen::MainScreen;
+            }
+            KeyCode::Char('n') => self.current_screen = CurrentScreen::MainScreen,
+            _ => {}
+        }
+    }
+
     fn exit(&mut self) {
         self.exit = true;
     }
@@ -72,6 +100,10 @@ impl App {
             let task = self.tasks.remove(selected);
             Task::delete(&mut self.conn, task.id).unwrap();
         }
+    }
+
+    fn start_task_deletion(&mut self) {
+        self.current_screen = CurrentScreen::Deleting;
     }
 
     fn render_task_list(&mut self, area: Rect, buf: &mut Buffer) {
@@ -99,6 +131,17 @@ impl App {
                 .render(area, buf);
         }
     }
+
+    fn render_confirm_deletion(&self, area: Rect, buf: &mut Buffer) {
+        let text = vec![
+            Line::from("Are you sure you want to delete this task?"),
+            Line::from("Press 'y' to confirm or 'n' to cancel"),
+        ];
+        Popup::default()
+            .title(Line::from("Confirm Deletion"))
+            .content(text)
+            .render(area, buf);
+    }
 }
 impl Widget for &mut App {
     fn render(self, area: Rect, buf: &mut Buffer) {
@@ -107,6 +150,10 @@ impl Widget for &mut App {
 
         self.render_task_list(main_area, buf);
         self.render_task_detail(detail_area, buf);
+        if let CurrentScreen::Deleting = self.current_screen {
+            let popup_area = centered_rect(40, 10, area);
+            self.render_confirm_deletion(popup_area, buf);
+        }
     }
 }
 

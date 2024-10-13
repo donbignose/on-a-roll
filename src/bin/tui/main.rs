@@ -1,5 +1,8 @@
 mod app;
-use crate::app::App;
+mod utils;
+mod widgets;
+
+use app::App;
 use std::io;
 
 fn main() -> io::Result<()> {

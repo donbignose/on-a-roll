@@ -26,6 +26,7 @@ diesel_migrations = "2.2.0"
 dotenvy = "0.15.7"
 glob = "0.3.1"
 ratatui = { version = "0.28.1", features = ["all-widgets"] }
+derive_setters = "0.1.6"
 
 # The profile that 'cargo dist' will build with
 [profile.dist]
