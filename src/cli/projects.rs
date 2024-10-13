@@ -1,6 +1,6 @@
+use crate::models::Project;
 use clap::{Args, Subcommand};
 use diesel::prelude::*;
-use on_a_roll::models::Project;
 
 #[derive(Debug, Args)]
 pub struct ProjectArgs {
@@ -48,6 +48,26 @@ enum ProjectCommands {
     /// List all projects
     List,
 }
+
+pub fn handle_project_args(args: ProjectArgs, connection: &mut SqliteConnection) {
+    match args.command {
+        ProjectCommands::Add {
+            title,
+            description,
+            status,
+        } => handle_project_add(connection, title, description, status),
+        ProjectCommands::Update {
+            project_id,
+            title,
+            description,
+            status,
+        } => handle_project_update(connection, project_id, title, description, status),
+        ProjectCommands::Delete { project_id } => handle_project_delete(connection, project_id),
+        ProjectCommands::Read { project_id } => handle_project_read(connection, project_id),
+        ProjectCommands::List => handle_project_list(connection),
+    }
+}
+
 fn handle_project_add(
     conn: &mut SqliteConnection,
     title: Option<String>,
@@ -120,23 +140,5 @@ fn handle_project_list(conn: &mut SqliteConnection) {
             }
         }
         Err(e) => eprintln!("Error listing projects: {}", e),
-    }
-}
-pub fn handle_project_args(args: ProjectArgs, connection: &mut SqliteConnection) {
-    match args.command {
-        ProjectCommands::Add {
-            title,
-            description,
-            status,
-        } => handle_project_add(connection, title, description, status),
-        ProjectCommands::Update {
-            project_id,
-            title,
-            description,
-            status,
-        } => handle_project_update(connection, project_id, title, description, status),
-        ProjectCommands::Delete { project_id } => handle_project_delete(connection, project_id),
-        ProjectCommands::Read { project_id } => handle_project_read(connection, project_id),
-        ProjectCommands::List => handle_project_list(connection),
     }
 }

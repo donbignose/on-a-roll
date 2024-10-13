@@ -1,6 +1,6 @@
+use crate::models::Task;
 use clap::{Args, Subcommand};
 use diesel::prelude::*;
-use on_a_roll::models::Task;
 
 #[derive(Debug, Args)]
 pub struct TaskArgs {

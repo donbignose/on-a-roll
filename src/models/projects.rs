@@ -3,7 +3,7 @@ use diesel::prelude::*;
 
 pub const DEFAULT_PROJECT_TITLE: &str = "New Project";
 pub const DEFAULT_PROJECT_STATUS: &str = "Planning";
-#[derive(Debug, Queryable, Selectable)]
+#[derive(Debug, Clone, Queryable, Selectable)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Project {
     pub id: i32,
