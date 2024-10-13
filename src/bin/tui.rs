@@ -1,8 +1,4 @@
-mod app;
-mod utils;
-mod widgets;
-
-use app::App;
+use on_a_roll::tui::app::App;
 use std::io;
 
 fn main() -> io::Result<()> {

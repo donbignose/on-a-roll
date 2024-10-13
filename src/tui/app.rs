@@ -1,10 +1,10 @@
-use crate::utils::centered_rect;
-use crate::widgets::popup::Popup;
+use super::utils::centered_rect;
+use super::widgets::popup::Popup;
 use std::io;
 
+use crate::db::connection::establish_connection;
+use crate::models::Task;
 use diesel::SqliteConnection;
-use on_a_roll::db::connection::establish_connection;
-use on_a_roll::models::Task;
 use ratatui::{
     buffer::Buffer,
     crossterm::event::{self, KeyCode, KeyEvent, KeyEventKind},

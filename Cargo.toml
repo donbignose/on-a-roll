@@ -13,7 +13,7 @@ path = "src/bin/cli.rs"
 
 [[bin]]
 name = "roll-tui"
-path = "src/bin/tui/main.rs"
+path = "src/bin/tui.rs"
 
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
