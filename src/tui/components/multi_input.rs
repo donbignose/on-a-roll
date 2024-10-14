@@ -3,6 +3,7 @@ use ratatui::{
     layout::{Constraint, Layout, Rect},
     Frame,
 };
+use strum::IntoEnumIterator;
 
 use crate::models::task_status::TaskStatus;
 
@@ -32,7 +33,7 @@ impl MultiInput {
             title: UserInput::new("Task Title".to_string(), true),
             description: UserInput::new("Task Description".to_string(), false),
             active_field: TaskInputField::Title,
-            status: ListSelection::new(vec![TaskStatus::Todo, TaskStatus::InProgress]),
+            status: ListSelection::new(TaskStatus::iter().collect()),
         }
     }
     fn switch_field(&mut self) {
@@ -69,11 +70,12 @@ impl MultiInput {
         self.active_field = TaskInputField::Title;
     }
 
-    pub fn set_inputs(&mut self, title: String, description: Option<String>) {
+    pub fn set_inputs(&mut self, title: String, description: Option<String>, status: TaskStatus) {
         self.title.set_input(title);
         if let Some(description) = description {
             self.description.set_input(description);
         }
+        self.status.set_selected(status)
     }
 }
 

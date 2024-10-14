@@ -28,6 +28,7 @@ dotenvy = "0.15.7"
 glob = "0.3.1"
 ratatui = { version = "0.28.1", features = ["all-widgets"] }
 derive_setters = "0.1.6"
+strum = { version = "0.26.3", features = ["derive"] }
 
 # The profile that 'cargo dist' will build with
 [profile.dist]

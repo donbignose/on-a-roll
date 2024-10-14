@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use diesel::SqliteConnection;
 use ratatui::{crossterm::event::KeyEvent, layout::Rect, Frame};
 
-use crate::models::Task;
+use crate::models::{task_status::TaskStatus, Task};
 
 use super::{
     multi_input::{MultiInput, TaskInputs},
@@ -22,13 +22,14 @@ impl TaskUpdate {
         task_id: i32,
         title: String,
         description: Option<String>,
+        status: TaskStatus,
     ) -> Self {
         let mut update = Self {
             conn,
             task_id,
             inputs: MultiInput::new(),
         };
-        update.inputs.set_inputs(title, description);
+        update.inputs.set_inputs(title, description, status);
         update
     }
 }

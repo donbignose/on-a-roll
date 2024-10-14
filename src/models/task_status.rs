@@ -1,7 +1,9 @@
+use ratatui::widgets::ListItem;
 use std::str::FromStr;
 
-use ratatui::widgets::ListItem;
-#[derive(Debug, Clone, Copy, PartialEq, Eq, diesel_derive_enum::DbEnum)]
+use strum::EnumIter;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, diesel_derive_enum::DbEnum, EnumIter)]
 pub enum TaskStatus {
     Todo,
     InProgress,

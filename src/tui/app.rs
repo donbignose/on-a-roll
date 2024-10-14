@@ -183,6 +183,7 @@ impl App {
                 task.id,
                 task.title.clone(),
                 task.description.clone(),
+                task.status,
             ));
             self.current_screen = CurrentScreen::TaskUpdate;
         }

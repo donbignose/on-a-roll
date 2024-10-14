@@ -21,7 +21,7 @@ where
 
 impl<T> ListSelection<T>
 where
-    T: Into<ListItem<'static>> + Clone,
+    T: Into<ListItem<'static>> + Clone + PartialEq,
 {
     pub fn new(items: Vec<T>) -> Self {
         Self {
@@ -41,6 +41,13 @@ where
     }
     pub fn reset(&mut self) {
         self.item_cursor.select(Some(0));
+    }
+    pub fn set_selected(&mut self, object: T) {
+        if let Some(index) = self.items.iter().position(|item| *item == object) {
+            self.item_cursor.select(Some(index));
+        } else {
+            eprintln!("Item not found in the list.");
+        }
     }
 }
 
