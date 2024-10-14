@@ -1,3 +1,4 @@
+use crate::models::project_status::ProjectStatus;
 use crate::models::Project;
 use clap::{Args, Subcommand};
 use diesel::prelude::*;
@@ -16,7 +17,7 @@ enum ProjectCommands {
         /// Optional project description
         description: Option<String>,
         /// Optional project status, defaults to 'Planning'
-        status: Option<String>,
+        status: Option<ProjectStatus>,
     },
     /// Update an existing project
     Update {
@@ -31,7 +32,7 @@ enum ProjectCommands {
         description: Option<String>,
         /// New project status
         #[arg(short, long)]
-        status: Option<String>,
+        status: Option<ProjectStatus>,
     },
     /// Delete an existing project
     Delete {
@@ -72,18 +73,13 @@ fn handle_project_add(
     conn: &mut SqliteConnection,
     title: Option<String>,
     description: Option<String>,
-    status: Option<String>,
+    status: Option<ProjectStatus>,
 ) {
     println!(
         "Adding project: {:?} with description: {:?} and status: {:?}",
         title, description, status
     );
-    match Project::create(
-        conn,
-        title.as_deref(),
-        description.as_deref(),
-        status.as_deref(),
-    ) {
+    match Project::create(conn, title.as_deref(), description.as_deref(), status) {
         Ok(project) => println!("Project created with id: {}", project.id),
         Err(e) => eprintln!("Error creating project: {}", e),
     }
@@ -94,7 +90,7 @@ fn handle_project_update(
     project_id: i32,
     title: Option<String>,
     description: Option<String>,
-    status: Option<String>,
+    status: Option<ProjectStatus>,
 ) {
     println!(
         "Updating project: {} with title: {:?}, description: {:?} and status: {:?}",
@@ -105,7 +101,7 @@ fn handle_project_update(
         project_id,
         title.as_deref(),
         description.as_deref(),
-        status.as_deref(),
+        status,
     ) {
         Ok(project) => println!("Project updated: {:?}", project),
         Err(e) => eprintln!("Error updating project: {}", e),

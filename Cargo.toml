@@ -21,6 +21,7 @@ diesel = { version = "2.2.4", features = [
   "sqlite",
   "returning_clauses_for_sqlite_3_35",
 ] }
+diesel-derive-enum = { version = "2.1.0", features = ["sqlite"] }
 libsqlite3-sys = { version = "0.30", features = ["bundled"] }
 diesel_migrations = "2.2.0"
 dotenvy = "0.15.7"
