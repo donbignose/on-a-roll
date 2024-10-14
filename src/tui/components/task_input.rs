@@ -1,108 +1,57 @@
 use diesel::SqliteConnection;
-use ratatui::{
-    crossterm::event::{KeyCode, KeyEvent},
-    layout::{Constraint, Layout, Rect},
-    Frame,
-};
+use ratatui::{crossterm::event::KeyEvent, layout::Rect, Frame};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::models::{task_status::TaskStatus, Task};
+use crate::models::Task;
 
-use super::{list_selection::ListSelection, user_input::UserInput, Component, InputSubmit};
+use super::{
+    multi_input::{MultiInput, TaskInputs},
+    Component, InputSubmit,
+};
 
-enum TaskInputField {
-    Title,
-    Description,
-    Status,
-}
 pub struct TaskInput {
     conn: Rc<RefCell<SqliteConnection>>,
-    title: UserInput,
-    description: UserInput,
-    status: ListSelection<TaskStatus>,
-    active_field: TaskInputField,
+    inputs: MultiInput,
 }
 
 impl TaskInput {
     pub fn new(conn: Rc<RefCell<SqliteConnection>>) -> Self {
         Self {
-            title: UserInput::new("Task Title".to_string(), true),
-            description: UserInput::new("Task Description".to_string(), false),
-            active_field: TaskInputField::Title,
-            status: ListSelection::new(vec![TaskStatus::Todo, TaskStatus::InProgress]),
             conn,
+            inputs: MultiInput::new(),
         }
-    }
-
-    fn switch_field(&mut self) {
-        match self.active_field {
-            TaskInputField::Title => {
-                self.active_field = TaskInputField::Description;
-                self.description.switch_active();
-                self.title.switch_active();
-            }
-            TaskInputField::Description => {
-                self.active_field = TaskInputField::Status;
-                self.description.switch_active();
-                self.status.switch_active();
-            }
-            TaskInputField::Status => {
-                self.active_field = TaskInputField::Title;
-                self.status.switch_active();
-                self.title.switch_active();
-            }
-        };
     }
 }
 
 impl InputSubmit for TaskInput {
     fn submit(&self) {
-        let title = self.title.get_input();
-        let description = self.description.get_input();
-        let task_status = self.status.selected().unwrap();
+        let TaskInputs {
+            title,
+            description,
+            status,
+        } = self.inputs.get_inputs();
         Task::create(
             &mut self.conn.borrow_mut(),
             Some(title),
             Some(description),
-            Some(task_status),
+            Some(status),
             None,
         )
         .unwrap();
     }
 
     fn reset(&mut self) {
-        self.title.reset();
-        self.description.reset();
-        self.status.reset();
-        self.active_field = TaskInputField::Title;
+        self.inputs.reset();
     }
 }
 
 impl Component for TaskInput {
     fn render(&mut self, f: &mut Frame, area: Rect) {
-        let [title_area, description_area, status_area] = Layout::vertical([
-            Constraint::Percentage(30),
-            Constraint::Percentage(40),
-            Constraint::Percentage(30),
-        ])
-        .areas(area);
-
-        self.title.render(f, title_area);
-        self.description.render(f, description_area);
-        self.status.render(f, status_area);
+        self.inputs.render(f, area);
     }
 
     fn handle_key_events(&mut self, key: KeyEvent) {
-        match key.code {
-            KeyCode::Tab => {
-                self.switch_field();
-            }
-            _ => match self.active_field {
-                TaskInputField::Title => self.title.handle_key_events(key),
-                TaskInputField::Description => self.description.handle_key_events(key),
-                TaskInputField::Status => self.status.handle_key_events(key),
-            },
-        }
+        self.inputs.handle_key_events(key);
     }
 }

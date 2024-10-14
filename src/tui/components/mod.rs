@@ -1,4 +1,5 @@
 mod list_selection;
+mod multi_input;
 pub mod task_input;
 mod user_input;
 
