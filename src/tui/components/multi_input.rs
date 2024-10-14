@@ -1,5 +1,5 @@
 use ratatui::{
-    crossterm::event::{KeyCode, KeyEvent},
+    crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
     layout::{Constraint, Layout, Rect},
     Frame,
 };
@@ -8,7 +8,9 @@ use strum::IntoEnumIterator;
 use crate::models::task_status::TaskStatus;
 
 use super::{list_selection::ListSelection, user_input::UserInput, Component};
+use strum::EnumIter;
 
+#[derive(Debug, Clone, PartialEq, EnumIter)]
 pub enum TaskInputField {
     Title,
     Description,
@@ -36,23 +38,36 @@ impl MultiInput {
             status: ListSelection::new(TaskStatus::iter().collect()),
         }
     }
-    fn switch_field(&mut self) {
+    fn switch_field(&mut self, reverse: bool) {
+        let fields: Vec<TaskInputField> = TaskInputField::iter().collect();
+        let mut index = fields.iter().position(|f| f == &self.active_field).unwrap();
+
+        // Determine the next field based on the direction
+        if reverse {
+            index = if index == 0 {
+                fields.len() - 1
+            } else {
+                index - 1
+            };
+        } else {
+            index = (index + 1) % fields.len();
+        }
+
+        // Deactivate the currently active field and activate the new one
         match self.active_field {
-            TaskInputField::Title => {
-                self.active_field = TaskInputField::Description;
-                self.description.switch_active();
-                self.title.switch_active();
-            }
-            TaskInputField::Description => {
-                self.active_field = TaskInputField::Status;
-                self.description.switch_active();
-                self.status.switch_active();
-            }
-            TaskInputField::Status => {
-                self.active_field = TaskInputField::Title;
-                self.status.switch_active();
-                self.title.switch_active();
-            }
+            TaskInputField::Title => self.title.switch_active(),
+            TaskInputField::Description => self.description.switch_active(),
+            TaskInputField::Status => self.status.switch_active(),
+        }
+
+        // Update the active field
+        self.active_field = fields[index].clone();
+
+        // Activate the new field
+        match self.active_field {
+            TaskInputField::Title => self.title.switch_active(),
+            TaskInputField::Description => self.description.switch_active(),
+            TaskInputField::Status => self.status.switch_active(),
         };
     }
 
@@ -96,7 +111,12 @@ impl Component for MultiInput {
     fn handle_key_events(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Tab => {
-                self.switch_field();
+                println!("{:?}", key.modifiers);
+                if key.modifiers.contains(KeyModifiers::SHIFT) {
+                    self.switch_field(true); // Switch in reverse order when Shift+Tab is pressed
+                } else {
+                    self.switch_field(false); // Switch forward when Tab is pressed
+                }
             }
             _ => match self.active_field {
                 TaskInputField::Title => self.title.handle_key_events(key),
