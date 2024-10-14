@@ -1,4 +1,6 @@
 use std::str::FromStr;
+
+use ratatui::widgets::ListItem;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, diesel_derive_enum::DbEnum)]
 pub enum TaskStatus {
     Todo,
@@ -39,5 +41,10 @@ impl std::fmt::Display for TaskStatus {
             TaskStatus::Canceled => "Canceled",
         };
         write!(f, "{}", status_str)
+    }
+}
+impl<'a> From<TaskStatus> for ListItem<'a> {
+    fn from(status: TaskStatus) -> Self {
+        ListItem::new(format!("{}", status))
     }
 }

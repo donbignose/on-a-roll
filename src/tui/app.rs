@@ -1,10 +1,10 @@
-use super::utils::centered_rect;
+use super::components::task_input::TaskInput;
 use super::widgets::popup::Popup;
-use std::io;
-
+use super::{components::Component, utils::centered_rect};
 use crate::db::connection::establish_connection;
 use crate::models::Task;
 use diesel::SqliteConnection;
+use ratatui::Frame;
 use ratatui::{
     buffer::Buffer,
     crossterm::event::{self, KeyCode, KeyEvent, KeyEventKind},
@@ -14,38 +14,52 @@ use ratatui::{
     widgets::{Block, List, ListState, Paragraph, StatefulWidget, Widget},
     DefaultTerminal,
 };
+use std::cell::RefCell;
+use std::io;
+use std::rc::Rc;
 
 enum CurrentScreen {
     MainScreen,
     Deleting,
+    TaskInput,
 }
 
 pub struct App {
-    conn: SqliteConnection,
+    conn: Rc<RefCell<SqliteConnection>>,
     tasks: Vec<Task>,
     task_state: ListState,
     current_screen: CurrentScreen,
+    task_input: TaskInput,
     exit: bool,
 }
 
 impl App {
     pub fn new() -> Self {
-        let mut conn = establish_connection();
-        let tasks = Task::list(&mut conn).unwrap();
+        let conn = Rc::new(RefCell::new(establish_connection()));
+        let tasks = Task::list(&mut conn.borrow_mut()).unwrap();
         Self {
-            conn,
+            conn: Rc::clone(&conn),
             tasks,
             task_state: ListState::default().with_selected(Some(0)),
             current_screen: CurrentScreen::MainScreen,
+            task_input: TaskInput::new(Rc::clone(&conn)),
             exit: false,
         }
     }
     pub fn run(mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
         while !self.exit {
-            terminal.draw(|frame| frame.render_widget(&mut self, frame.area()))?;
+            terminal.draw(|frame| self.draw(frame))?;
             self.handle_events()?;
         }
         Ok(())
+    }
+
+    fn draw(&mut self, frame: &mut Frame) {
+        frame.render_widget(&mut *self, frame.area());
+        if let CurrentScreen::TaskInput = self.current_screen {
+            self.task_input
+                .render(frame, centered_rect(50, 30, frame.area()));
+        }
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
@@ -63,6 +77,7 @@ impl App {
         match self.current_screen {
             CurrentScreen::MainScreen => self.handle_main_screen_key_event(key_event),
             CurrentScreen::Deleting => self.handle_deleting_screen_key_event(key_event),
+            CurrentScreen::TaskInput => self.handle_task_input_key_event(key_event),
         }
     }
 
@@ -73,6 +88,7 @@ impl App {
             KeyCode::Char('j') => self.task_state.select_next(),
             KeyCode::Char('k') => self.task_state.select_previous(),
             KeyCode::Char('d') => self.start_task_deletion(),
+            KeyCode::Char('a') => self.start_task_input(),
             _ => {}
         }
     }
@@ -88,22 +104,39 @@ impl App {
         }
     }
 
+    fn handle_task_input_key_event(&mut self, key_event: KeyEvent) {
+        match key_event.code {
+            KeyCode::Esc => {
+                self.current_screen = CurrentScreen::MainScreen;
+            }
+            KeyCode::Enter => {
+                self.task_input.create_task_and_reset();
+                self.current_screen = CurrentScreen::MainScreen;
+                self.refresh_tasks();
+            }
+            _ => self.task_input.handle_key_events(key_event),
+        }
+    }
+
     fn exit(&mut self) {
         self.exit = true;
     }
     fn refresh_tasks(&mut self) {
-        self.tasks = Task::list(&mut self.conn).unwrap();
+        self.tasks = Task::list(&mut self.conn.borrow_mut()).unwrap();
     }
 
     fn delete_selected_task(&mut self) {
         if let Some(selected) = self.task_state.selected() {
             let task = self.tasks.remove(selected);
-            Task::delete(&mut self.conn, task.id).unwrap();
+            Task::delete(&mut self.conn.borrow_mut(), task.id).unwrap();
         }
     }
 
     fn start_task_deletion(&mut self) {
         self.current_screen = CurrentScreen::Deleting;
+    }
+    fn start_task_input(&mut self) {
+        self.current_screen = CurrentScreen::TaskInput;
     }
 
     fn render_task_list(&mut self, area: Rect, buf: &mut Buffer) {
