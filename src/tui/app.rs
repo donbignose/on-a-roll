@@ -1,4 +1,5 @@
 use super::components::task_input::TaskInput;
+use super::components::task_update::TaskUpdate;
 use super::components::InputSubmit;
 use super::widgets::popup::Popup;
 use super::{components::Component, utils::centered_rect};
@@ -23,6 +24,7 @@ enum CurrentScreen {
     MainScreen,
     Deleting,
     TaskInput,
+    TaskUpdate,
 }
 
 pub struct App {
@@ -31,6 +33,7 @@ pub struct App {
     task_state: ListState,
     current_screen: CurrentScreen,
     task_input: TaskInput,
+    task_update: Option<TaskUpdate>,
     exit: bool,
 }
 
@@ -44,6 +47,7 @@ impl App {
             task_state: ListState::default().with_selected(Some(0)),
             current_screen: CurrentScreen::MainScreen,
             task_input: TaskInput::new(Rc::clone(&conn)),
+            task_update: None,
             exit: false,
         }
     }
@@ -57,6 +61,18 @@ impl App {
 
     fn draw(&mut self, frame: &mut Frame) {
         frame.render_widget(&mut *self, frame.area());
+        match self.current_screen {
+            CurrentScreen::TaskInput => {
+                self.task_input
+                    .render(frame, centered_rect(50, 30, frame.area()));
+            }
+            CurrentScreen::TaskUpdate => {
+                if let Some(task_update) = &mut self.task_update {
+                    task_update.render(frame, centered_rect(50, 30, frame.area()));
+                }
+            }
+            _ => {}
+        }
         if let CurrentScreen::TaskInput = self.current_screen {
             self.task_input
                 .render(frame, centered_rect(50, 30, frame.area()));
@@ -79,6 +95,7 @@ impl App {
             CurrentScreen::MainScreen => self.handle_main_screen_key_event(key_event),
             CurrentScreen::Deleting => self.handle_deleting_screen_key_event(key_event),
             CurrentScreen::TaskInput => self.handle_task_input_key_event(key_event),
+            CurrentScreen::TaskUpdate => self.handle_task_update_key_event(key_event),
         }
     }
 
@@ -90,6 +107,7 @@ impl App {
             KeyCode::Char('k') => self.task_state.select_previous(),
             KeyCode::Char('d') => self.start_task_deletion(),
             KeyCode::Char('a') => self.start_task_input(),
+            KeyCode::Char('u') => self.start_task_update(),
             _ => {}
         }
     }
@@ -118,6 +136,23 @@ impl App {
             _ => self.task_input.handle_key_events(key_event),
         }
     }
+    fn handle_task_update_key_event(&mut self, key_event: KeyEvent) {
+        if let Some(task_update) = &mut self.task_update {
+            match key_event.code {
+                KeyCode::Esc => {
+                    self.current_screen = CurrentScreen::MainScreen;
+                    self.task_update = None;
+                }
+                KeyCode::Enter => {
+                    task_update.submit_and_reset();
+                    self.task_update = None;
+                    self.current_screen = CurrentScreen::MainScreen;
+                    self.refresh_tasks();
+                }
+                _ => task_update.handle_key_events(key_event),
+            }
+        }
+    }
 
     fn exit(&mut self) {
         self.exit = true;
@@ -138,6 +173,19 @@ impl App {
     }
     fn start_task_input(&mut self) {
         self.current_screen = CurrentScreen::TaskInput;
+    }
+
+    fn start_task_update(&mut self) {
+        if let Some(selected) = self.task_state.selected() {
+            let task = &self.tasks[selected];
+            self.task_update = Some(TaskUpdate::new(
+                Rc::clone(&self.conn),
+                task.id,
+                task.title.clone(),
+                task.description.clone(),
+            ));
+            self.current_screen = CurrentScreen::TaskUpdate;
+        }
     }
 
     fn render_task_list(&mut self, area: Rect, buf: &mut Buffer) {

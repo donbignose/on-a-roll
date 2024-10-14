@@ -1,6 +1,7 @@
 mod list_selection;
 mod multi_input;
 pub mod task_input;
+pub mod task_update;
 mod user_input;
 
 use ratatui::{crossterm::event::KeyEvent, layout::Rect, Frame};

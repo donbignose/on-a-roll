@@ -37,6 +37,11 @@ impl UserInput {
         &self.input
     }
 
+    pub fn set_input(&mut self, input: String) {
+        self.input = input;
+        self.set_cursor_max_position();
+    }
+
     fn move_cursor_left(&mut self) {
         let cursor_moved_left = self.character_index.saturating_sub(1);
         self.character_index = self.clamp_cursor(cursor_moved_left);
@@ -94,6 +99,10 @@ impl UserInput {
 
     fn reset_cursor(&mut self) {
         self.character_index = 0;
+    }
+
+    fn set_cursor_max_position(&mut self) {
+        self.character_index = self.input.chars().count();
     }
 
     pub fn reset(&mut self) {

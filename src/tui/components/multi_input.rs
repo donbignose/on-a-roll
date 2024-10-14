@@ -68,6 +68,13 @@ impl MultiInput {
         self.status.reset();
         self.active_field = TaskInputField::Title;
     }
+
+    pub fn set_inputs(&mut self, title: String, description: Option<String>) {
+        self.title.set_input(title);
+        if let Some(description) = description {
+            self.description.set_input(description);
+        }
+    }
 }
 
 impl Component for MultiInput {
