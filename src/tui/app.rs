@@ -1,4 +1,5 @@
 use super::components::task_input::TaskInput;
+use super::components::InputSubmit;
 use super::widgets::popup::Popup;
 use super::{components::Component, utils::centered_rect};
 use crate::db::connection::establish_connection;
@@ -110,7 +111,7 @@ impl App {
                 self.current_screen = CurrentScreen::MainScreen;
             }
             KeyCode::Enter => {
-                self.task_input.create_task_and_reset();
+                self.task_input.submit_and_reset();
                 self.current_screen = CurrentScreen::MainScreen;
                 self.refresh_tasks();
             }

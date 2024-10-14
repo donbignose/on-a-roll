@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 use crate::models::{task_status::TaskStatus, Task};
 
-use super::{list_selection::ListSelection, user_input::UserInput, Component};
+use super::{list_selection::ListSelection, user_input::UserInput, Component, InputSubmit};
 
 enum TaskInputField {
     Title,
@@ -54,13 +54,10 @@ impl TaskInput {
             }
         };
     }
+}
 
-    pub fn create_task_and_reset(&mut self) {
-        self.create_task();
-        self.reset();
-    }
-
-    fn create_task(&self) {
+impl InputSubmit for TaskInput {
+    fn submit(&self) {
         let title = self.title.get_input();
         let description = self.description.get_input();
         let task_status = self.status.selected().unwrap();
