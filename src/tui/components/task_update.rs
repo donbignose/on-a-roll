@@ -1,7 +1,13 @@
 use std::{cell::RefCell, rc::Rc};
 
 use diesel::SqliteConnection;
-use ratatui::{crossterm::event::KeyEvent, layout::Rect, Frame};
+use ratatui::{
+    crossterm::event::KeyEvent,
+    layout::Rect,
+    style::{Modifier, Style},
+    widgets::{Block, Borders},
+    Frame,
+};
 
 use crate::models::{task_status::TaskStatus, Task};
 
@@ -60,7 +66,14 @@ impl InputSubmit for TaskUpdate {
 
 impl Component for TaskUpdate {
     fn render(&mut self, f: &mut Frame, area: Rect) {
-        self.inputs.render(f, area);
+        let block = Block::default()
+            .borders(Borders::ALL) // Add borders on all sides
+            .title(format!("Task Update for task {}", self.task_id)) // Optional: Add a title to the border
+            .style(Style::default().add_modifier(Modifier::BOLD)); // Add styles if needed
+
+        let inner_area = block.inner(area);
+        f.render_widget(block, area);
+        self.inputs.render(f, inner_area);
     }
     fn handle_key_events(&mut self, key: KeyEvent) {
         self.inputs.handle_key_events(key);

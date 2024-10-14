@@ -81,16 +81,16 @@ impl MultiInput {
 
 impl Component for MultiInput {
     fn render(&mut self, f: &mut Frame, area: Rect) {
-        let [title_area, description_area, status_area] = Layout::vertical([
-            Constraint::Percentage(30),
-            Constraint::Percentage(40),
-            Constraint::Percentage(30),
-        ])
-        .areas(area);
+        let [text_area, list_area] =
+            Layout::horizontal([Constraint::Percentage(65), Constraint::Percentage(35)])
+                .areas(area);
+        let [title_area, description_area] =
+            Layout::vertical([Constraint::Percentage(50), Constraint::Percentage(50)])
+                .areas(text_area);
 
         self.title.render(f, title_area);
         self.description.render(f, description_area);
-        self.status.render(f, status_area);
+        self.status.render(f, list_area);
     }
 
     fn handle_key_events(&mut self, key: KeyEvent) {

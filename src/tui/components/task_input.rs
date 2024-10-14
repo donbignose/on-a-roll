@@ -1,5 +1,11 @@
 use diesel::SqliteConnection;
-use ratatui::{crossterm::event::KeyEvent, layout::Rect, Frame};
+use ratatui::{
+    crossterm::event::KeyEvent,
+    layout::Rect,
+    style::{Modifier, Style},
+    widgets::{Block, Borders},
+    Frame,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -48,7 +54,14 @@ impl InputSubmit for TaskInput {
 
 impl Component for TaskInput {
     fn render(&mut self, f: &mut Frame, area: Rect) {
-        self.inputs.render(f, area);
+        let block = Block::default()
+            .borders(Borders::ALL) // Add borders on all sides
+            .title("Task Creation") // Optional: Add a title to the border
+            .style(Style::default().add_modifier(Modifier::BOLD)); // Add styles if needed
+
+        let inner_area = block.inner(area);
+        f.render_widget(block, area);
+        self.inputs.render(f, inner_area);
     }
 
     fn handle_key_events(&mut self, key: KeyEvent) {
