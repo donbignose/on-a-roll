@@ -12,12 +12,12 @@ use ratatui::{
 use crate::models::{task_status::TaskStatus, Task};
 
 use super::{
-    multi_input::{MultiInput, TaskInputs},
+    multi_input::{Inputs, MultiInput},
     Component, InputSubmit,
 };
 
 pub struct TaskUpdate {
-    inputs: MultiInput,
+    inputs: MultiInput<TaskStatus>,
     conn: Rc<RefCell<SqliteConnection>>,
     task_id: i32,
 }
@@ -42,7 +42,7 @@ impl TaskUpdate {
 
 impl InputSubmit for TaskUpdate {
     fn submit(&self) {
-        let TaskInputs {
+        let Inputs {
             title,
             description,
             status,
@@ -53,7 +53,7 @@ impl InputSubmit for TaskUpdate {
             self.task_id,
             Some(title),
             Some(description),
-            Some(status),
+            Some(*status),
             None,
         )
         .unwrap();

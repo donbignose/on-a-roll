@@ -9,16 +9,16 @@ use ratatui::{
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::models::Task;
+use crate::models::{task_status::TaskStatus, Task};
 
 use super::{
-    multi_input::{MultiInput, TaskInputs},
+    multi_input::{Inputs, MultiInput},
     Component, InputSubmit,
 };
 
 pub struct TaskInput {
     conn: Rc<RefCell<SqliteConnection>>,
-    inputs: MultiInput,
+    inputs: MultiInput<TaskStatus>,
 }
 
 impl TaskInput {
@@ -32,7 +32,7 @@ impl TaskInput {
 
 impl InputSubmit for TaskInput {
     fn submit(&self) {
-        let TaskInputs {
+        let Inputs {
             title,
             description,
             status,
@@ -41,7 +41,7 @@ impl InputSubmit for TaskInput {
             &mut self.conn.borrow_mut(),
             Some(title),
             Some(description),
-            Some(status),
+            Some(*status),
             None,
         )
         .unwrap();

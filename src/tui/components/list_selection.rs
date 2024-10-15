@@ -34,10 +34,10 @@ where
         self.active = !self.active
     }
 
-    pub fn selected(&self) -> Option<T> {
+    pub fn selected(&self) -> Option<&T> {
         self.item_cursor
             .selected()
-            .map(|selected| self.items[selected].clone())
+            .map(|selected| &self.items[selected])
     }
     pub fn reset(&mut self) {
         self.item_cursor.select(Some(0));
