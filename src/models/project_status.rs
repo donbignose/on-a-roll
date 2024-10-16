@@ -1,6 +1,8 @@
+use ratatui::widgets::ListItem;
 use std::str::FromStr;
+use strum::EnumIter;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, diesel_derive_enum::DbEnum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, diesel_derive_enum::DbEnum, EnumIter)]
 pub enum ProjectStatus {
     Planning,
     Active,
@@ -40,5 +42,10 @@ impl std::fmt::Display for ProjectStatus {
             ProjectStatus::Canceled => "Canceled",
         };
         write!(f, "{}", status_str)
+    }
+}
+impl<'a> From<ProjectStatus> for ListItem<'a> {
+    fn from(status: ProjectStatus) -> Self {
+        ListItem::new(format!("{}", status))
     }
 }

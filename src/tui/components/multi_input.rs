@@ -1,5 +1,5 @@
 use ratatui::{
-    crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
+    crossterm::event::{KeyCode, KeyEvent},
     layout::{Constraint, Layout, Rect},
     widgets::ListItem,
     Frame,
@@ -40,7 +40,7 @@ where
             title: UserInput::new("Task Title".to_string(), true),
             description: UserInput::new("Task Description".to_string(), false),
             active_field: InputField::Title,
-            status: ListSelection::new(T::iter().collect()),
+            status: ListSelection::new(T::iter().collect(), "Status"),
         }
     }
     fn switch_field(&mut self, reverse: bool) {
@@ -118,13 +118,8 @@ where
 
     fn handle_key_events(&mut self, key: KeyEvent) {
         match key.code {
-            KeyCode::Tab => {
-                if key.modifiers.contains(KeyModifiers::SHIFT) {
-                    self.switch_field(true); // Switch in reverse order when Shift+Tab is pressed
-                } else {
-                    self.switch_field(false); // Switch forward when Tab is pressed
-                }
-            }
+            KeyCode::Tab => self.switch_field(false),
+            KeyCode::BackTab => self.switch_field(true),
             _ => match self.active_field {
                 InputField::Title => self.title.handle_key_events(key),
                 InputField::Description => self.description.handle_key_events(key),

@@ -1,6 +1,11 @@
 mod list_selection;
 mod multi_input;
+pub mod popup;
+mod project_input;
+pub mod project_list;
+mod project_update;
 pub mod task_input;
+pub mod task_list;
 pub mod task_update;
 mod user_input;
 
