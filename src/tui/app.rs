@@ -33,13 +33,15 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let conn = Rc::new(RefCell::new(establish_connection()));
-        Self {
+        let mut app = Self {
             tasks: TaskList::new(Rc::clone(&conn)),
             projects: ProjectList::new(Rc::clone(&conn)),
             active_screen: ActiveScreen::Tasks,
             popup: None,
             exit: false,
-        }
+        };
+        app.tasks.switch_active();
+        app
     }
     pub fn run(mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
         while !self.exit {
@@ -51,7 +53,10 @@ impl App {
 
     fn draw(&mut self, frame: &mut Frame) {
         let [main_area, detail_area] =
-            Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)]).areas(frame.area());
+            Layout::horizontal([Constraint::Fill(3), Constraint::Fill(2)])
+                .margin(1)
+                .spacing(1)
+                .areas(frame.area());
         let [task_area, project_area] =
             Layout::vertical([Constraint::Percentage(50), Constraint::Percentage(50)])
                 .areas(main_area);
@@ -103,7 +108,12 @@ impl App {
     fn handle_tasks_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Char('q') => self.exit(),
-            KeyCode::Tab => self.active_screen = ActiveScreen::Projects,
+            KeyCode::Tab => {
+                self.active_screen = ActiveScreen::Projects;
+                self.tasks.switch_active();
+                self.projects.switch_active()
+            }
+
             _ => self.tasks.handle_key_events(key_event),
         }
     }
@@ -111,7 +121,11 @@ impl App {
     fn hannle_projects_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Char('q') => self.exit(),
-            KeyCode::Tab => self.active_screen = ActiveScreen::Tasks,
+            KeyCode::Tab => {
+                self.active_screen = ActiveScreen::Tasks;
+                self.tasks.switch_active();
+                self.projects.switch_active()
+            }
             _ => self.projects.handle_key_events(key_event),
         }
     }

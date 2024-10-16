@@ -61,6 +61,9 @@ impl ProjectList {
         self.projects
             .set_items(Project::list(&mut self.conn.borrow_mut()).unwrap());
     }
+    pub fn switch_active(&mut self) {
+        self.projects.switch_active();
+    }
 }
 
 impl Component for ProjectList {

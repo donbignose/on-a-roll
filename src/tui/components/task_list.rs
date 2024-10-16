@@ -59,6 +59,9 @@ impl TaskList {
         self.tasks
             .set_items(Task::list(&mut self.conn.borrow_mut()).unwrap());
     }
+    pub fn switch_active(&mut self) {
+        self.tasks.switch_active();
+    }
 }
 
 impl Component for TaskList {
