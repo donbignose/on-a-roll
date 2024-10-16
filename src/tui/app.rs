@@ -131,17 +131,6 @@ impl App {
         }
     }
 
-    // fn handle_deleting_screen_key_event(&mut self, key_event: KeyEvent) {
-    //     match key_event.code {
-    //         KeyCode::Char('y') => {
-    //             self.delete_selected_task();
-    //             self.active_screen = CurrentScreen::MainScreen;
-    //         }
-    //         KeyCode::Char('n') => self.active_screen = CurrentScreen::MainScreen,
-    //         _ => {}
-    //     }
-    // }
-
     fn exit(&mut self) {
         self.exit = true;
     }
@@ -149,17 +138,6 @@ impl App {
         self.tasks.refresh();
         self.projects.refresh()
     }
-
-    // fn delete_selected_task(&mut self) {
-    //     if let Some(selected) = self.task_state.selected() {
-    //         let task = self.tasks.remove(selected);
-    //         Task::delete(&mut self.conn.borrow_mut(), task.id).unwrap();
-    //     }
-    // }
-    //
-    // fn start_task_deletion(&mut self) {
-    //     self.active_screen = CurrentScreen::Deleting;
-    // }
 
     fn render_task_detail(&self, area: Rect, buf: &mut Buffer) {
         if let Some(selected_task) = self.tasks.get_selected() {
@@ -192,17 +170,6 @@ impl App {
                 .render(area, buf);
         }
     }
-
-    // fn render_confirm_deletion(&self, area: Rect, buf: &mut Buffer) {
-    //     let text = vec![
-    //         Line::from("Are you sure you want to delete this task?"),
-    //         Line::from("Press 'y' to confirm or 'n' to cancel"),
-    //     ];
-    //     Popup::default()
-    //         .title(Line::from("Confirm Deletion"))
-    //         .content(text)
-    //         .render(area, buf);
-    // }
 }
 impl Widget for &mut App {
     fn render(self, area: Rect, buf: &mut Buffer) {

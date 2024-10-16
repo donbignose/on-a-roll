@@ -10,8 +10,8 @@ use ratatui::{
 use crate::models::Project;
 
 use super::{
-    list_selection::ListSelection, popup::Popup, project_input::ProjectInput,
-    project_update::ProjectUpdate, Component,
+    list_selection::ListSelection, popup::Popup, project_delete::ProjectDelete,
+    project_input::ProjectInput, project_update::ProjectUpdate, Component,
 };
 
 pub struct ProjectList {
@@ -49,41 +49,14 @@ impl ProjectList {
                 }
             }
             KeyCode::Char('d') => {
-                // self.mode = Mode::Delete;
+                self.popup = Some(Popup::ProjectDelete(ProjectDelete::new(
+                    Rc::clone(&self.conn),
+                    self.projects.selected().unwrap().id,
+                )))
             }
             _ => self.projects.handle_key_events(key),
         }
     }
-    // fn handle_add_key_events(&mut self, key: KeyEvent) {
-    //     match key.code {
-    //         KeyCode::Enter => {
-    //             self.project_input.submit_and_reset();
-    //             // self.mode = Mode::List;
-    //             self.refresh();
-    //         }
-    //         KeyCode::Esc => {
-    //             // self.mode = Mode::List;
-    //         }
-    //         _ => self.project_input.handle_key_events(key),
-    //     }
-    // }
-    // fn handle_update_key_events(&mut self, key_event: KeyEvent) {
-    //     if let Some(project_update) = &mut self.project_update {
-    //         match key_event.code {
-    //             KeyCode::Esc => {
-    //                 // self.mode = Mode::List;
-    //                 self.project_update = None;
-    //             }
-    //             KeyCode::Enter => {
-    //                 project_update.submit_and_reset();
-    //                 self.project_update = None;
-    //                 // self.mode = Mode::List;
-    //                 self.refresh();
-    //             }
-    //             _ => project_update.handle_key_events(key_event),
-    //         }
-    //     }
-    // }
     pub fn refresh(&mut self) {
         self.projects
             .set_items(Project::list(&mut self.conn.borrow_mut()).unwrap());

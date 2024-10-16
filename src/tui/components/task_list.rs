@@ -10,8 +10,8 @@ use ratatui::{
 use crate::models::Task;
 
 use super::{
-    list_selection::ListSelection, popup::Popup, task_input::TaskInput, task_update::TaskUpdate,
-    Component,
+    list_selection::ListSelection, popup::Popup, task_delete::TaskDelete, task_input::TaskInput,
+    task_update::TaskUpdate, Component,
 };
 
 pub struct TaskList {
@@ -47,41 +47,14 @@ impl TaskList {
                 }
             }
             KeyCode::Char('d') => {
-                // self.mode = Mode::Delete;
+                self.popup = Some(Popup::TaskDelete(TaskDelete::new(
+                    Rc::clone(&self.conn),
+                    self.tasks.selected().unwrap().id,
+                )))
             }
             _ => self.tasks.handle_key_events(key),
         }
     }
-    // fn handle_add_key_events(&mut self, key: KeyEvent) {
-    //     match key.code {
-    //         KeyCode::Enter => {
-    //             self.task_input.submit_and_reset();
-    //             // self.mode = Mode::List;
-    //             self.refresh();
-    //         }
-    //         KeyCode::Esc => {
-    //             // self.mode = Mode::List;
-    //         }
-    //         _ => self.task_input.handle_key_events(key),
-    //     }
-    // }
-    // fn handle_update_key_events(&mut self, key_event: KeyEvent) {
-    //     if let Some(task_update) = &mut self.task_update {
-    //         match key_event.code {
-    //             KeyCode::Esc => {
-    //                 // self.mode = Mode::List;
-    //                 self.task_update = None;
-    //             }
-    //             KeyCode::Enter => {
-    //                 task_update.submit_and_reset();
-    //                 self.task_update = None;
-    //                 // self.mode = Mode::List;
-    //                 self.refresh();
-    //             }
-    //             _ => task_update.handle_key_events(key_event),
-    //         }
-    //     }
-    // }
     pub fn refresh(&mut self) {
         self.tasks
             .set_items(Task::list(&mut self.conn.borrow_mut()).unwrap());
