@@ -1,7 +1,9 @@
 mod common;
 use common::establish_test_connection;
+use on_a_roll::models::task_status::TaskStatus;
 use on_a_roll::models::Task;
 use on_a_roll::models::{DEFAULT_TASK_STATUS, DEFAULT_TASK_TITLE};
+use std::str::FromStr;
 
 #[test]
 fn test_create_task() {
@@ -32,14 +34,14 @@ fn test_update_task() {
         task.id,
         Some("New Title"),
         None,
-        Some("completed"),
+        Some(TaskStatus::from_str("Completed").unwrap()),
         None,
     );
 
     match updated_result {
         Ok(updated_task) => {
             assert_eq!(updated_task.title, "New Title");
-            assert_eq!(updated_task.status, "completed");
+            assert_eq!(updated_task.status, TaskStatus::Completed);
         }
         Err(e) => panic!("Failed to update task: {}", e),
     }

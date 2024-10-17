@@ -1,3 +1,4 @@
+use crate::models::task_status::TaskStatus;
 use crate::models::{NewTask, Task, UpdateTask};
 use crate::schema::tasks::dsl::tasks;
 use diesel::prelude::*;
@@ -14,7 +15,7 @@ impl Task {
         conn: &mut SqliteConnection,
         title: Option<&str>,
         description: Option<&str>,
-        status: Option<&str>,
+        status: Option<TaskStatus>,
         project_id: Option<i32>,
     ) -> Result<Self, Error> {
         let new_task = NewTask {
@@ -34,7 +35,7 @@ impl Task {
         id: i32,
         title: Option<&str>,
         description: Option<&str>,
-        status: Option<&str>,
+        status: Option<TaskStatus>,
         project_id: Option<i32>,
     ) -> Result<Self, Error> {
         let update_task = UpdateTask {

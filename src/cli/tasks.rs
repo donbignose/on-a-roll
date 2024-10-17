@@ -1,6 +1,7 @@
+use crate::models::task_status::TaskStatus;
+use crate::models::Task;
 use clap::{Args, Subcommand};
 use diesel::prelude::*;
-use on_a_roll::models::Task;
 
 #[derive(Debug, Args)]
 pub struct TaskArgs {
@@ -17,7 +18,7 @@ enum TaskCommands {
         /// Optional task description
         description: Option<String>,
         /// Optional task status, defaults to 'pending'
-        status: Option<String>,
+        status: Option<TaskStatus>,
         /// Optional project id
         project_id: Option<i32>,
     },
@@ -34,7 +35,7 @@ enum TaskCommands {
         description: Option<String>,
         /// New task status
         #[arg(short, long)]
-        status: Option<String>,
+        status: Option<TaskStatus>,
         /// New project id
         #[arg(short, long = "project")]
         project_id: Option<i32>,
@@ -59,7 +60,7 @@ fn handle_task_add(
     conn: &mut SqliteConnection,
     title: Option<String>,
     description: Option<String>,
-    status: Option<String>,
+    status: Option<TaskStatus>,
     project_id: Option<i32>,
 ) {
     println!(
@@ -70,7 +71,7 @@ fn handle_task_add(
         conn,
         title.as_deref(),
         description.as_deref(),
-        status.as_deref(),
+        status,
         project_id,
     ) {
         Ok(task) => println!("Task created with id: {}", task.id),
@@ -83,7 +84,7 @@ fn handle_task_update(
     task_id: i32,
     title: Option<String>,
     description: Option<String>,
-    status: Option<String>,
+    status: Option<TaskStatus>,
     project_id: Option<i32>,
 ) {
     println!(
@@ -95,7 +96,7 @@ fn handle_task_update(
         task_id,
         title.as_deref(),
         description.as_deref(),
-        status.as_deref(),
+        status,
         project_id,
     ) {
         Ok(task) => println!("Task updated: {:?}", task),

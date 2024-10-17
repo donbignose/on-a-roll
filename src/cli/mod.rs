@@ -1,12 +1,11 @@
 mod projects;
 mod tasks;
 use clap::{Parser, Subcommand};
-use on_a_roll::db::connection::establish_connection;
 
 #[derive(Debug, Parser)]
 #[command(name = "roll")]
 #[command(author, version, about, long_about = None)]
-struct Cli {
+pub struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
@@ -19,16 +18,13 @@ enum Commands {
     Project(projects::ProjectArgs),
 }
 
-fn main() {
-    let cli = Cli::parse();
-    let mut conn = establish_connection();
-
+pub fn run_cli(cli: Cli, conn: &mut diesel::SqliteConnection) {
     match cli.command {
         Commands::Task(task_args) => {
-            tasks::handle_task_args(task_args, &mut conn);
+            tasks::handle_task_args(task_args, conn);
         }
         Commands::Project(project_args) => {
-            projects::handle_project_args(project_args, &mut conn);
+            projects::handle_project_args(project_args, conn);
         }
     }
 }

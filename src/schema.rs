@@ -1,20 +1,24 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    use crate::models::project_status::ProjectStatusMapping;
+    use diesel::sql_types::{Integer, Text, Nullable};
     projects (id) {
         id -> Integer,
         title -> Text,
         description -> Nullable<Text>,
-        status -> Text,
+        status -> ProjectStatusMapping,
     }
 }
 
 diesel::table! {
+    use crate::models::task_status::TaskStatusMapping;
+    use diesel::sql_types::{Integer, Text, Nullable};
     tasks (id) {
         id -> Integer,
         title -> Text,
         description -> Nullable<Text>,
-        status -> Text,
+        status -> TaskStatusMapping,
         project_id -> Nullable<Integer>,
     }
 }
