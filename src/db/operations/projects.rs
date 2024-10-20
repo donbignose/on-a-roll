@@ -1,3 +1,4 @@
+use crate::models::project_status::ProjectStatus;
 use crate::models::{NewProject, Project, UpdateProject};
 use crate::schema::projects::dsl::projects;
 use diesel::prelude::*;
@@ -14,7 +15,7 @@ impl Project {
         conn: &mut SqliteConnection,
         title: Option<&str>,
         description: Option<&str>,
-        status: Option<&str>,
+        status: Option<ProjectStatus>,
     ) -> Result<Self, Error> {
         let new_project = NewProject {
             title,
@@ -32,7 +33,7 @@ impl Project {
         id: i32,
         title: Option<&str>,
         description: Option<&str>,
-        status: Option<&str>,
+        status: Option<ProjectStatus>,
     ) -> Result<Self, Error> {
         let update_project = UpdateProject {
             id,

@@ -8,8 +8,12 @@ license = "MIT"
 
 [[bin]]
 name = "roll"
-path = "src/bin/cli/main.rs"
+path = "src/bin/cli.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "roll-tui"
+path = "src/bin/tui.rs"
 
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
@@ -17,10 +21,14 @@ diesel = { version = "2.2.4", features = [
   "sqlite",
   "returning_clauses_for_sqlite_3_35",
 ] }
+diesel-derive-enum = { version = "2.1.0", features = ["sqlite"] }
 libsqlite3-sys = { version = "0.30", features = ["bundled"] }
 diesel_migrations = "2.2.0"
 dotenvy = "0.15.7"
 glob = "0.3.1"
+ratatui = { version = "0.28.1", features = ["all-widgets"] }
+derive_setters = "0.1.6"
+strum = { version = "0.26.3", features = ["derive"] }
 
 # The profile that 'cargo dist' will build with
 [profile.dist]

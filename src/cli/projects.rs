@@ -1,6 +1,7 @@
+use crate::models::project_status::ProjectStatus;
+use crate::models::Project;
 use clap::{Args, Subcommand};
 use diesel::prelude::*;
-use on_a_roll::models::Project;
 
 #[derive(Debug, Args)]
 pub struct ProjectArgs {
@@ -16,7 +17,7 @@ enum ProjectCommands {
         /// Optional project description
         description: Option<String>,
         /// Optional project status, defaults to 'Planning'
-        status: Option<String>,
+        status: Option<ProjectStatus>,
     },
     /// Update an existing project
     Update {
@@ -31,7 +32,7 @@ enum ProjectCommands {
         description: Option<String>,
         /// New project status
         #[arg(short, long)]
-        status: Option<String>,
+        status: Option<ProjectStatus>,
     },
     /// Delete an existing project
     Delete {
@@ -48,22 +49,37 @@ enum ProjectCommands {
     /// List all projects
     List,
 }
+
+pub fn handle_project_args(args: ProjectArgs, connection: &mut SqliteConnection) {
+    match args.command {
+        ProjectCommands::Add {
+            title,
+            description,
+            status,
+        } => handle_project_add(connection, title, description, status),
+        ProjectCommands::Update {
+            project_id,
+            title,
+            description,
+            status,
+        } => handle_project_update(connection, project_id, title, description, status),
+        ProjectCommands::Delete { project_id } => handle_project_delete(connection, project_id),
+        ProjectCommands::Read { project_id } => handle_project_read(connection, project_id),
+        ProjectCommands::List => handle_project_list(connection),
+    }
+}
+
 fn handle_project_add(
     conn: &mut SqliteConnection,
     title: Option<String>,
     description: Option<String>,
-    status: Option<String>,
+    status: Option<ProjectStatus>,
 ) {
     println!(
         "Adding project: {:?} with description: {:?} and status: {:?}",
         title, description, status
     );
-    match Project::create(
-        conn,
-        title.as_deref(),
-        description.as_deref(),
-        status.as_deref(),
-    ) {
+    match Project::create(conn, title.as_deref(), description.as_deref(), status) {
         Ok(project) => println!("Project created with id: {}", project.id),
         Err(e) => eprintln!("Error creating project: {}", e),
     }
@@ -74,7 +90,7 @@ fn handle_project_update(
     project_id: i32,
     title: Option<String>,
     description: Option<String>,
-    status: Option<String>,
+    status: Option<ProjectStatus>,
 ) {
     println!(
         "Updating project: {} with title: {:?}, description: {:?} and status: {:?}",
@@ -85,7 +101,7 @@ fn handle_project_update(
         project_id,
         title.as_deref(),
         description.as_deref(),
-        status.as_deref(),
+        status,
     ) {
         Ok(project) => println!("Project updated: {:?}", project),
         Err(e) => eprintln!("Error updating project: {}", e),
@@ -120,23 +136,5 @@ fn handle_project_list(conn: &mut SqliteConnection) {
             }
         }
         Err(e) => eprintln!("Error listing projects: {}", e),
-    }
-}
-pub fn handle_project_args(args: ProjectArgs, connection: &mut SqliteConnection) {
-    match args.command {
-        ProjectCommands::Add {
-            title,
-            description,
-            status,
-        } => handle_project_add(connection, title, description, status),
-        ProjectCommands::Update {
-            project_id,
-            title,
-            description,
-            status,
-        } => handle_project_update(connection, project_id, title, description, status),
-        ProjectCommands::Delete { project_id } => handle_project_delete(connection, project_id),
-        ProjectCommands::Read { project_id } => handle_project_read(connection, project_id),
-        ProjectCommands::List => handle_project_list(connection),
     }
 }
